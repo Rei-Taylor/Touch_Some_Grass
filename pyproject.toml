@@ -1,0 +1,11 @@
+[project]
+name = "grass-toucher"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12.6"
+dependencies = [
+    "pillow>=11.3.0",
+    "plyer>=2.1.0",
+    "pystray>=0.19.5",
+]
