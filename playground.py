@@ -29,7 +29,10 @@ class GrassReminderApp:
     def __init__(self):
         self.config = self.load_config()
         self.root = tk.Tk()
-        self.root.withdraw()
+        self.root.overrideredirect(True)
+        self.root.geometry("0x0+0+0")  
+        self.root.attributes("-alpha", 0.0)
+        self.root.withdraw = lambda : None
         # Break tracking
         self.session_start = None
         self.break_start = None
@@ -87,12 +90,19 @@ class GrassReminderApp:
         return Path(base_path) / relative_path    
 
     def open_settings(self):
+        # Create settings window with stable parent (self.root is alive!)
         settings_win = tk.Toplevel(self.root)
         settings_win.title("Grass Reminder Settings")
         settings_win.geometry("400x250")
         settings_win.resizable(False, False)
         settings_win.transient(self.root)
         settings_win.grab_set()
+        settings_win.focus_set()
+        settings_win.lift()
+        settings_win.attributes('-topmost', True)
+
+        # Prevent closing via [X] without saving? Optional.
+        # settings_win.protocol("WM_DELETE_WINDOW", lambda: None)
 
         tk.Label(settings_win, text="Session Duration (minutes):", font=("Arial", 12)).pack(pady=(20, 5))
         session_var = tk.StringVar(value=str(self.config["session_duration_minutes"]))
@@ -133,7 +143,6 @@ class GrassReminderApp:
                 
                 settings_win.destroy()
                 messagebox.showinfo("Success", "Settings saved!")
-                # Show notification after saving
                 if PLYER_AVAILABLE:
                     try:
                         notification.notify(
@@ -155,6 +164,10 @@ class GrassReminderApp:
             bg="green",
             fg="white"
         ).pack(pady=10)
+
+        # CRITICAL: Force focus and keep on top after creation
+        settings_win.after(50, lambda: settings_win.focus_force())
+        settings_win.after(100, lambda: settings_win.attributes('-topmost', True))
 
     def quit_app(self):
         self.monitoring = False
