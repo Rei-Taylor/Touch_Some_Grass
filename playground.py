@@ -259,9 +259,7 @@ class GrassReminderApp:
             window.destroy()
 
     def end_break(self):
-        self.is_break_active = False
-        self.session_start = None
-        self.break_start = None
+        pass
 
     def run(self):
         try:
