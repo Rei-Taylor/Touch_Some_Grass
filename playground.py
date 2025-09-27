@@ -35,6 +35,7 @@ class GrassReminderApp:
         self.break_start = None
         self.is_break_active = False
         self.monitoring = False
+        self.break_window = None  # Track break window to avoid duplicates @Lunar-vow-crimson
         self.img = self.resource_path("static/grass.png")
         self.root.iconphoto(True, tk.PhotoImage(file=self.img))
 
@@ -52,7 +53,6 @@ class GrassReminderApp:
         self.start_monitoring()
 
     def show_startup_notification(self):
-        """Show a desktop notification that monitoring had started"""
         if not PLYER_AVAILABLE:
             return
 
@@ -68,8 +68,8 @@ class GrassReminderApp:
             print(f"Failed to show notification: {e}")
 
     @staticmethod
-    def create_image(path : str):
-        if not path:
+    def create_image(path: str):
+        if not path or not os.path.exists(path):
             image = Image.new('RGB', (64, 64), 'green')
             dc = ImageDraw.Draw(image)
             for i in range(0, 64, 8):
@@ -77,6 +77,7 @@ class GrassReminderApp:
             return image
         else:
             return Image.open(path)
+
     @staticmethod    
     def resource_path(relative_path):
         try:
@@ -205,17 +206,23 @@ class GrassReminderApp:
                 if self.break_start:
                     break_duration = (current_time - self.break_start).total_seconds() / 60
                     if break_duration >= self.config["break_duration_minutes"]:
-                        self.end_break()
+                        self.root.after(0, self.end_break)
 
             time.sleep(1)
 
     def trigger_break(self):
+        if self.is_break_active or self.break_window is not None:
+            return 
         self.is_break_active = True
         self.break_start = datetime.now()
         self.root.after(0, self.show_break_window)
 
     def show_break_window(self):
+        if self.break_window is not None:
+            return
+
         break_window = tk.Toplevel(self.root)
+        self.break_window = break_window
         break_window.title("Touch Grass!")
         break_window.attributes('-fullscreen', True)
         break_window.attributes('-topmost', True)
@@ -248,18 +255,30 @@ class GrassReminderApp:
         )
         close_btn.pack(pady=20)
 
-        self.root.after(
-            int(self.config["break_duration_minutes"] * 60 * 1000),
-            lambda: close_btn.config(state='normal')
-        )
+        break_ms = int(self.config["break_duration_minutes"] * 60 * 1000)
+
+        self.root.after(break_ms, lambda: close_btn.config(state='normal') if break_window.winfo_exists() else None)
+        self.root.after(break_ms, lambda: self.auto_end_break(break_window))
 
     def attempt_close_break(self, window):
+        if window.winfo_exists():
+            window.destroy()
+        self.break_window = None
         if self.is_break_active:
             self.end_break()
+
+    def auto_end_break(self, window):
+        if window.winfo_exists():
             window.destroy()
+        self.break_window = None
+        if self.is_break_active:
+            self.end_break()
 
     def end_break(self):
-        pass
+        self.is_break_active = False
+        self.session_start = None
+        self.break_start = None
+        self.break_window = None
 
     def run(self):
         try:
