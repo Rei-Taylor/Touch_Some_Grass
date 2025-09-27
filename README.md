@@ -3,7 +3,7 @@
 
 Stop doomscrolling. Stop gaming. Stop watching videos. Go touch real grass. 
 
-This app gently (but firmly!) forces you to take breaks from your screen—whether you're stuck in a gaming loop, binge-watching, or just zoning out on your desktop. After a set time of screen use, it locks your screen with a full-screen reminder: "TUCH SOME GRASS!" until your break is over. 
+This app gently (but firmly!) forces you to take breaks from your screen—whether you're stuck in a gaming loop, binge-watching, or just zoning out on your desktop. After a set time of screen use, it locks your screen with a full-screen reminder: "TOUCH SOME GRASS!" until your break is over. 
 Features 
 
     🕒 Custom timers: Set how long you work before a break kicks in  
